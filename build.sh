@@ -6,7 +6,7 @@
 KERNELDIR=$PWD
 KERNEL_DEFCONFIG=tama_akatsuki_defconfig
 ANYKERNEL3_DIR=$PWD/AnyKernel3/
-FINAL_KERNEL_ZIP=Ara_Ara_Kernel-V1.0.zip
+FINAL_KERNEL_ZIP=Hybrid-Theory_Kernel-V1.0.zip
 O=out
 CC=clang
 export PATH="$KERNELDIR/prebuilts/proton-clang/bin:${PATH}"
