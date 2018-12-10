@@ -495,10 +495,6 @@
 	firmware: firmware {
 		android {
 			compatible = "android,firmware";
-			vbmeta {
-				compatible = "android,vbmeta";
-				parts = "vbmeta,boot,system,vendor,dtbo";
-			};
 
 			android_q_fstab: fstab {
 				compatible = "android,fstab";
