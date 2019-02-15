@@ -4,7 +4,7 @@
 
 ## Copy this script inside the kernel directory
 KERNELDIR=$PWD
-KERNEL_DEFCONFIG=tama_akatsuki_defconfig
+KERNEL_DEFCONFIG=tama_akari_defconfig
 ANYKERNEL3_DIR=$PWD/AnyKernel3/
 FINAL_KERNEL_ZIP=Hybrid-Theory_Kernel-V1.0.zip
 O=out
