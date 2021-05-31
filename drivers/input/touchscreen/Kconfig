@@ -164,26 +164,6 @@ config TOUCHSCREEN_CHIPONE_ICN8318
 	  To compile this driver as a module, choose M here: the
 	  module will be called chipone_icn8318.
 
-config TOUCHSCREEN_CLEARPAD
-        tristate "Synaptics ClearPad"
-	default n
-        help
-          Say Y here to enable Synaptics ClearPad touchscreen.
-
-config TOUCHSCREEN_CLEARPAD_I2C
-        tristate "Synaptics ClearPad I2C"
-	depends on I2C && TOUCHSCREEN_CLEARPAD
-	default n
-        help
-          Say Y here to enable Synaptics ClearPad I2C touchscreen.
-
-config TOUCHSCREEN_CLEARPAD_RMI_DEV
-        tristate "Synaptics ClearPad RMI Dev"
-	depends on GPIO_SYSFS && TOUCHSCREEN_CLEARPAD && TOUCHSCREEN_CLEARPAD_I2C
-	default n
-        help
-          Say Y here to enable Synaptics ClearPad RMI dev.
-
 config TOUCHSCREEN_CY8CTMG110
 	tristate "cy8ctmg110 touchscreen"
 	depends on I2C
@@ -1394,7 +1374,6 @@ config TOUCHSCREEN_SYNAPTICS_DSX
           If unsure, say N.
 
 source "drivers/input/touchscreen/synaptics_dsx/Kconfig"
-source "drivers/input/touchscreen/synaptics_tcm/Kconfig"
 source "drivers/input/touchscreen/focaltech_touch/Kconfig"
 
 config TOUCHSCREEN_FT5X06
@@ -1465,6 +1444,12 @@ config TOUCHSCREEN_EKTF3XXX_CHIPSET
 
 		  If unusre, say N.
 
-source "drivers/input/touchscreen/atmel_mxt640u/Kconfig"
+config TOUCHSCREEN_RAYDIUM_CHIPSET
+	bool "Raydium WT030 touchpanel CHIPSET"
+	depends on I2C
+	help
+	  Say Y here if you have a Raydium WT030 CHIPSET touchscreen.
+
+	  If unsure, say N.
 
 endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2016-2020, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -36,14 +36,6 @@
 
 #define DSI_MODE_MAX 5
 
-#ifdef CONFIG_DRM_SDE_SPECIFIC_PANEL
-#define SDE_PINCTRL_STATE_TOUCH_ACTIVE "sde_touch_active"
-#define SDE_PINCTRL_STATE_TOUCH_SUSPEND  "sde_touch_suspend"
-#define DISPLAY_BL_MIN 4
-#define DISPLAY_BL_OFF 0
-#define DISPLAY_BL_ON 1
-#endif /* CONFIG_DRM_SDE_SPECIFIC_PANEL */
-
 enum dsi_panel_rotation {
 	DSI_PANEL_ROTATE_NONE = 0,
 	DSI_PANEL_ROTATE_HV_FLIP,
@@ -78,20 +70,24 @@ enum dsi_dms_mode {
 };
 
 struct dsi_dfps_capabilities {
-	bool dfps_support;
 	enum dsi_dfps_type type;
 	u32 min_refresh_rate;
 	u32 max_refresh_rate;
+	u32 *dfps_list;
+	u32 dfps_list_len;
+	bool dfps_support;
+};
+
+struct dsi_dyn_clk_caps {
+	bool dyn_clk_support;
+	u32 *bit_clk_list;
+	u32 bit_clk_list_len;
 };
 
 struct dsi_pinctrl_info {
 	struct pinctrl *pinctrl;
 	struct pinctrl_state *active;
 	struct pinctrl_state *suspend;
-#ifdef CONFIG_DRM_SDE_SPECIFIC_PANEL
-	struct pinctrl_state *touch_state_active;
-	struct pinctrl_state *touch_state_suspend;
-#endif /* CONFIG_DRM_SDE_SPECIFIC_PANEL */
 };
 
 struct dsi_panel_phy_props {
@@ -165,6 +161,17 @@ enum dsi_panel_type {
 	DSI_PANEL_TYPE_MAX,
 };
 
+/* Extended Panel config for panels with additional gpios */
+struct dsi_panel_exd_config {
+	int display_1p8_en;
+	int led_5v_en;
+	int switch_power;
+	int led_en1;
+	int led_en2;
+	int oenab;
+	int selab;
+};
+
 struct dsi_panel {
 	const char *name;
 	enum dsi_panel_type type;
@@ -182,6 +189,7 @@ struct dsi_panel {
 	enum dsi_op_mode panel_mode;
 
 	struct dsi_dfps_capabilities dfps_caps;
+	struct dsi_dyn_clk_caps dyn_clk_caps;
 	struct dsi_panel_phy_props phy_props;
 
 	struct dsi_display_mode *cur_mode;
@@ -208,9 +216,7 @@ struct dsi_panel {
 
 	bool sync_broadcast_en;
 
-#ifdef CONFIG_DRM_SDE_SPECIFIC_PANEL
-	struct panel_specific_pdata *spec_pdata;
-#endif /* CONFIG_DRM_SDE_SPECIFIC_PANEL */
+	struct dsi_panel_exd_config exd_config;
 };
 
 static inline bool dsi_panel_ulps_feature_enabled(struct dsi_panel *panel)
@@ -275,16 +281,6 @@ int dsi_panel_set_lp1(struct dsi_panel *panel);
 int dsi_panel_set_lp2(struct dsi_panel *panel);
 
 int dsi_panel_set_nolp(struct dsi_panel *panel);
-
-#ifdef CONFIG_DRM_SDE_SPECIFIC_PANEL
-int dsi_panel_set_aod_on(struct dsi_panel *panel);
-
-int dsi_panel_set_aod_off(struct dsi_panel *panel);
-
-int dsi_panel_set_vr_on(struct dsi_panel *panel);
-
-int dsi_panel_set_vr_off(struct dsi_panel *panel);
-#endif /* CONFIG_DRM_SDE_SPECIFIC_PANEL */
 
 int dsi_panel_prepare(struct dsi_panel *panel);
 
