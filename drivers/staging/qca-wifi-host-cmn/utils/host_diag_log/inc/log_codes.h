@@ -894,7 +894,7 @@
 /* Call Manager Serving System event log */
 #define LOG_CM_SS_EVENT_C                               (0x34F + LOG_1X_BASE_C)
 
-/* VcTcxo manager’s automatic frequency control log */
+/* VcTcxo manager\92s automatic frequency control log */
 #define LOG_TCXOMGR_AFC_DATA_C                          (0x350 + LOG_1X_BASE_C)
 
 /* Clock transactions and general clocks status log */
@@ -1908,7 +1908,7 @@
 /*DTV CMMB ESSG Program Indication Information*/
 #define LOG_DTV_CMMB_ESG_PROGRAM_INDICATION_INFORMATION    ((0x4C0) + LOG_1X_BASE_C)
 
-/* Sensors ¨C binary output of converted sensor data */
+/* Sensors \A8C binary output of converted sensor data */
 #define LOG_CONVERTED_SENSOR_DATA_C                             ((0x4C1) + LOG_1X_BASE_C)
 
 /* CM Subscription event */
@@ -2002,6 +2002,12 @@
 #define LOG_1X_LAST_C                                   ((0x8E0) + LOG_1X_BASE_C)
 
 #define LOG_WLAN_COLD_BOOT_CAL_DATA_C                  ((0xA18) + LOG_1X_BASE_C)
+
+#define LOG_WLAN_AUTH_ASSOC_TX_RX_INFO_C              ((0xA19) + LOG_1X_BASE_C)
+#define LOG_WLAN_ROAM_TRIGGER_INFO_C                  ((0xA1A) + LOG_1X_BASE_C)
+#define LOG_WLAN_ROAM_SCAN_INFO_C                     ((0xA1B) + LOG_1X_BASE_C)
+#define LOG_WLAN_ROAM_RESULT_INFO_C                   ((0xA1C) + LOG_1X_BASE_C)
+#define LOG_WLAN_RRM_TX_RX_INFO_C                     ((0xA1D) + LOG_1X_BASE_C)
 
 #define LOG_WLAN_DP_PROTO_PKT_INFO_C                   ((0xA1E) + LOG_1X_BASE_C)
 
