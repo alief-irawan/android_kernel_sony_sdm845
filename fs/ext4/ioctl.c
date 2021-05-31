@@ -191,7 +191,6 @@ journal_err_out:
 	return err;
 }
 
-#ifdef CONFIG_FS_ENCRYPTION
 static int uuid_is_zero(__u8 u[16])
 {
 	int	i;
@@ -201,7 +200,6 @@ static int uuid_is_zero(__u8 u[16])
 			return 0;
 	return 1;
 }
-#endif
 
 static int ext4_ioctl_setflags(struct inode *inode,
 			       unsigned int flags)
@@ -739,21 +737,16 @@ resizefs_out:
 		return err;
 	}
 
-	case FIDTRIM:
 	case FITRIM:
 	{
 		struct request_queue *q = bdev_get_queue(sb->s_bdev);
 		struct fstrim_range range;
 		int ret = 0;
-		int flags  = cmd == FIDTRIM ? BLKDEV_DISCARD_SECURE : 0;
 
 		if (!capable(CAP_SYS_ADMIN))
 			return -EPERM;
 
 		if (!blk_queue_discard(q))
-			return -EOPNOTSUPP;
-
-		if ((flags & BLKDEV_DISCARD_SECURE) && !blk_queue_secure_erase(q))
 			return -EOPNOTSUPP;
 
 		/*
@@ -769,7 +762,7 @@ resizefs_out:
 
 		range.minlen = max((unsigned int)range.minlen,
 				   q->limits.discard_granularity);
-		ret = ext4_trim_fs(sb, &range, flags);
+		ret = ext4_trim_fs(sb, &range);
 		if (ret < 0)
 			return ret;
 
@@ -783,17 +776,16 @@ resizefs_out:
 		return ext4_ext_precache(inode);
 
 	case EXT4_IOC_SET_ENCRYPTION_POLICY:
-//		if (!ext4_has_feature_encrypt(sb))
-//			return -EOPNOTSUPP;
+		if (!ext4_has_feature_encrypt(sb))
+			return -EOPNOTSUPP;
 		return fscrypt_ioctl_set_policy(filp, (const void __user *)arg);
 
 	case EXT4_IOC_GET_ENCRYPTION_PWSALT: {
-#ifdef CONFIG_FS_ENCRYPTION
 		int err, err2;
 		struct ext4_sb_info *sbi = EXT4_SB(sb);
 		handle_t *handle;
 
-		if (!ext4_has_feature_encrypt(sb))
+		if (!ext4_sb_has_crypto(sb))
 			return -EOPNOTSUPP;
 		if (uuid_is_zero(sbi->s_es->s_encrypt_pw_salt)) {
 			err = mnt_want_write_file(filp);
@@ -807,7 +799,10 @@ resizefs_out:
 			err = ext4_journal_get_write_access(handle, sbi->s_sbh);
 			if (err)
 				goto pwsalt_err_journal;
+			lock_buffer(sbi->s_sbh);
 			generate_random_uuid(sbi->s_es->s_encrypt_pw_salt);
+			ext4_superblock_csum_set(sb);
+			unlock_buffer(sbi->s_sbh);
 			err = ext4_handle_dirty_metadata(handle, NULL,
 							 sbi->s_sbh);
 		pwsalt_err_journal:
@@ -823,9 +818,6 @@ resizefs_out:
 				 sbi->s_es->s_encrypt_pw_salt, 16))
 			return -EFAULT;
 		return 0;
-#else
-		return -EOPNOTSUPP;
-#endif
 	}
 	case EXT4_IOC_GET_ENCRYPTION_POLICY:
 		return fscrypt_ioctl_get_policy(filp, (void __user *)arg);
@@ -835,6 +827,7 @@ resizefs_out:
 		struct fsxattr fa;
 
 		memset(&fa, 0, sizeof(struct fsxattr));
+		ext4_get_inode_flags(ei);
 		fa.fsx_xflags = ext4_iflags_to_xflags(ei->i_flags & EXT4_FL_USER_VISIBLE);
 
 		if (ext4_has_feature_project(inode->i_sb)) {
