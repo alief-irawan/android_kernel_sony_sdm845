@@ -114,6 +114,13 @@ static inline int pld_snoc_smmu_map(struct device *dev, phys_addr_t paddr,
 {
 	return 0;
 }
+
+static inline int pld_snoc_smmu_unmap(struct device *dev,
+				      uint32_t iova_addr, size_t size)
+{
+	return 0;
+}
+
 static inline
 unsigned int pld_snoc_socinfo_get_serial_number(struct device *dev)
 {
@@ -147,6 +154,10 @@ static inline int pld_snoc_is_fw_rejuvenate(void)
 	return 0;
 }
 
+static inline void pld_snoc_block_shutdown(bool status)
+{
+}
+
 #ifdef FEATURE_WLAN_TIME_SYNC_FTM
 static inline int
 pld_snoc_get_audio_wlan_timestamp(struct device *dev,
@@ -156,6 +167,16 @@ pld_snoc_get_audio_wlan_timestamp(struct device *dev,
 	return 0;
 }
 #endif /* FEATURE_WLAN_TIME_SYNC_FTM */
+
+static inline int pld_snoc_idle_restart(struct device *dev)
+{
+	return 0;
+}
+
+static inline int pld_snoc_idle_shutdown(struct device *dev)
+{
+	return 0;
+}
 
 #else
 int pld_snoc_register_driver(void);
@@ -183,20 +204,12 @@ pld_snoc_get_audio_wlan_timestamp(struct device *dev,
 				  enum pld_wlan_time_sync_trigger_type type,
 				  uint64_t *ts)
 {
-	enum wlan_time_sync_trigger_type edge_type;
-
 	if (!dev)
 		return -ENODEV;
 
-	if (type == PLD_TRIGGER_POSITIVE_EDGE)
-		edge_type = CNSS_POSITIVE_EDGE_TRIGGER;
-	else
-		edge_type = CNSS_NEGATIVE_EDGE_TRIGGER;
-
-	return cnss_get_audio_wlan_timestamp(dev, edge_type, ts);
+	return 0;
 }
 #endif /* FEATURE_WLAN_TIME_SYNC_FTM */
-
 static inline int pld_snoc_ce_request_irq(struct device *dev,
 					  unsigned int ce_id,
 					  irqreturn_t (*handler)(int, void *),
@@ -285,6 +298,22 @@ static inline int pld_snoc_smmu_map(struct device *dev, phys_addr_t paddr,
 {
 	return icnss_smmu_map(dev, paddr, iova_addr, size);
 }
+
+#ifdef CONFIG_SMMU_S1_UNMAP
+static inline int pld_snoc_smmu_unmap(struct device *dev,
+				      uint32_t iova_addr, size_t size)
+{
+	return icnss_smmu_unmap(dev, iova_addr, size);
+}
+
+#else
+static inline int pld_snoc_smmu_unmap(struct device *dev,
+				      uint32_t iova_addr, size_t size)
+{
+	return 0;
+}
+#endif
+
 static inline
 unsigned int pld_snoc_socinfo_get_serial_number(struct device *dev)
 {
@@ -326,6 +355,12 @@ static inline int pld_snoc_is_fw_rejuvenate(void)
 {
 	return icnss_is_rejuvenate();
 }
+
+static inline void pld_snoc_block_shutdown(bool status)
+{
+	icnss_block_shutdown(status);
+}
+
 static inline int pld_snoc_idle_restart(struct device *dev)
 {
 	return icnss_idle_restart(dev);
