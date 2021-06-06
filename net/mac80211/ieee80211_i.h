@@ -847,10 +847,6 @@ struct ieee80211_if_nan {
 	struct idr function_inst_ids;
 };
 
-struct ieee80211_if_mntr {
-	u32 flags;
-};
-
 struct ieee80211_sub_if_data {
 	struct list_head list;
 

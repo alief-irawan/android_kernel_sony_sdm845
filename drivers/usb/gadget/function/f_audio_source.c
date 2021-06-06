@@ -1114,13 +1114,6 @@ static struct usb_function_instance *audio_source_alloc_inst(void)
 					"f_audio_source%d", count++);
 	}
 
-	dev = create_function_device(device_name);
-
-	if (IS_ERR(dev)) {
-		err_ptr = dev;
-		goto fail_audio_config;
-	}
-
 	fi_audio->config->card = -1;
 	fi_audio->config->device = -1;
 	fi_audio->audio_device = dev;

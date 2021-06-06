@@ -318,7 +318,6 @@ void workingset_refault(struct page *page, void *shadow)
 	/* Page was active prior to eviction */
 	if (workingset) {
 		SetPageWorkingset(page);
-		inc_node_state(pgdat, WORKINGSET_RESTORE);
 	}
 out:
 	rcu_read_unlock();

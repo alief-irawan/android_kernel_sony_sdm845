@@ -485,7 +485,6 @@ int cam_irq_controller_unsubscribe_irq(void *irq_controller,
 	}
 
 	if (found) {
-		priority = evt_handler->priority;
 		for (i = 0; i < controller->num_registers; i++) {
 			controller->irq_register_arr[i].
 				top_half_enable_mask[evt_handler->priority] &=

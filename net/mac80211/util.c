@@ -598,7 +598,7 @@ static void __iterate_interfaces(struct ieee80211_local *local,
 	list_for_each_entry_rcu(sdata, &local->interfaces, list) {
 		switch (sdata->vif.type) {
 		case NL80211_IFTYPE_MONITOR:
-			if (!(sdata->u.mntr_flags & MONITOR_FLAG_ACTIVE))
+			if (!(sdata->u.mntr.flags & MONITOR_FLAG_ACTIVE))
 				continue;
 			break;
 		case NL80211_IFTYPE_AP_VLAN:
@@ -943,22 +943,16 @@ u32 ieee802_11_parse_elems_crc(const u8 *start, size_t len, bool action,
 				elem_parse_failed = true;
 			break;
 		case WLAN_EID_VHT_OPERATION:
-			if (elen >= sizeof(struct ieee80211_vht_operation)) {
+			if (elen >= sizeof(struct ieee80211_vht_operation))
 				elems->vht_operation = (void *)pos;
-				if (calc_crc)
-					crc = crc32_be(crc, pos - 2, elen + 2);
-				break;
-			}
-			elem_parse_failed = true;
+			else
+				elem_parse_failed = true;
 			break;
 		case WLAN_EID_OPMODE_NOTIF:
-			if (elen > 0) {
+			if (elen > 0)
 				elems->opmode_notif = pos;
-				if (calc_crc)
-					crc = crc32_be(crc, pos - 2, elen + 2);
-				break;
-			}
-			elem_parse_failed = true;
+			else
+				elem_parse_failed = true;
 			break;
 		case WLAN_EID_MESH_ID:
 			elems->mesh_id = pos;

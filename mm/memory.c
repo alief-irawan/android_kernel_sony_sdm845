@@ -2381,9 +2381,9 @@ static int wp_page_copy(struct fault_env *fe, pte_t orig_pte,
 		 * thread doing COW.
 		 */
 		ptep_clear_flush_notify(vma, fe->address, fe->pte);
-		__page_add_new_anon_rmap(new_page, vma, fe->address, false);
+		page_add_new_anon_rmap(new_page, vma, fe->address, false);
 		mem_cgroup_commit_charge(new_page, memcg, false, false);
-		__lru_cache_add_active_or_unevictable(new_page, fe->vma_flags);
+		lru_cache_add_active_or_unevictable(new_page, vma);
 		/*
 		 * We call the notify macro here because, when using secondary
 		 * mmu page tables (such as kvm shadow page tables), we want the
@@ -2854,9 +2854,9 @@ int do_swap_page(struct fault_env *fe, pte_t orig_pte)
 		mem_cgroup_commit_charge(page, memcg, true, false);
 		activate_page(page);
 	} else { /* ksm created a completely new copy */
-		__page_add_new_anon_rmap(page, vma, fe->address, false);
+		page_add_new_anon_rmap(page, vma, fe->address, false);
 		mem_cgroup_commit_charge(page, memcg, false, false);
-		__lru_cache_add_active_or_unevictable(page, fe->vma_flags);
+		lru_cache_add_active_or_unevictable(page, vma);
 	}
 
 	swap_free(entry);
@@ -3001,9 +3001,9 @@ static int do_anonymous_page(struct fault_env *fe)
 	}
 
 	inc_mm_counter_fast(vma->vm_mm, MM_ANONPAGES);
-	__page_add_new_anon_rmap(page, vma, fe->address, false);
+	page_add_new_anon_rmap(page, vma, fe->address, false);
 	mem_cgroup_commit_charge(page, memcg, false, false);
-	__lru_cache_add_active_or_unevictable(page, fe->vma_flags);
+	lru_cache_add_active_or_unevictable(page, vma);
 setpte:
 	set_pte_at(vma->vm_mm, fe->address, fe->pte, entry);
 
@@ -3263,9 +3263,9 @@ int alloc_set_pte(struct fault_env *fe, struct mem_cgroup *memcg,
 	/* copy-on-write page */
 	if (write && !(fe->vma_flags & VM_SHARED)) {
 		inc_mm_counter_fast(vma->vm_mm, MM_ANONPAGES);
-		__page_add_new_anon_rmap(page, vma, fe->address, false);
+		page_add_new_anon_rmap(page, vma, fe->address, false);
 		mem_cgroup_commit_charge(page, memcg, false, false);
-		__lru_cache_add_active_or_unevictable(page, fe->vma_flags);
+		lru_cache_add_active_or_unevictable(page, vma);
 	} else {
 		inc_mm_counter_fast(vma->vm_mm, mm_counter_file(page));
 		page_add_file_rmap(page, false);

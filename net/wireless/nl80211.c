@@ -1382,46 +1382,6 @@ nl80211_send_mgmt_stypes(struct sk_buff *msg,
 	return 0;
 }
 
-static int
-nl80211_put_iftype_akm_suites(struct cfg80211_registered_device *rdev,
-			      struct sk_buff *msg)
-{
-	int i;
-	struct nlattr *nested, *nested_akms;
-	const struct wiphy_iftype_akm_suites *iftype_akms;
-
-	if (!rdev->wiphy.num_iftype_akm_suites ||
-	    !rdev->wiphy.iftype_akm_suites)
-		return 0;
-
-	nested = nla_nest_start(msg, NL80211_ATTR_IFTYPE_AKM_SUITES);
-	if (!nested)
-		return -ENOBUFS;
-
-	for (i = 0; i < rdev->wiphy.num_iftype_akm_suites; i++) {
-		nested_akms = nla_nest_start(msg, i + 1);
-		if (!nested_akms)
-			return -ENOBUFS;
-
-		iftype_akms = &rdev->wiphy.iftype_akm_suites[i];
-
-		if (nl80211_put_iftypes(msg, NL80211_IFTYPE_AKM_ATTR_IFTYPES,
-					iftype_akms->iftypes_mask))
-			return -ENOBUFS;
-
-		if (nla_put(msg, NL80211_IFTYPE_AKM_ATTR_SUITES,
-			    sizeof(u32) * iftype_akms->n_akm_suites,
-			    iftype_akms->akm_suites)) {
-			return -ENOBUFS;
-		}
-		nla_nest_end(msg, nested_akms);
-	}
-
-	nla_nest_end(msg, nested);
-
-	return 0;
-}
-
 struct nl80211_dump_wiphy_state {
 	s64 filter_wiphy;
 	long start;
@@ -1969,13 +1929,6 @@ static int nl80211_send_wiphy(struct cfg80211_registered_device *rdev,
 				break;
 			}
 		}
-
-		state->split_start++;
-		break;
-	case 14:
-
-		if (nl80211_put_iftype_akm_suites(rdev, msg))
-			goto nla_put_failure;
 
 		/* done */
 		state->split_start = 0;
@@ -3279,24 +3232,6 @@ static int nl80211_set_key(struct sk_buff *skb, struct genl_info *info)
 #ifdef CONFIG_CFG80211_WEXT
 		dev->ieee80211_ptr->wext.default_key = key.idx;
 #endif
-	} else if (key.defbeacon) {
-		if (key.def_uni || !key.def_multi) {
-			err = -EINVAL;
-			goto out;
-		}
-
-		if (!rdev->ops->set_default_beacon_key) {
-			err = -EOPNOTSUPP;
-			goto out;
-		}
-
-		err = nl80211_key_allowed(dev->ieee80211_ptr);
-		if (err)
-			goto out;
-
-		err = rdev_set_default_beacon_key(rdev, dev, key.idx);
-		if (err)
-			goto out;
 	} else {
 		if (key.def_uni || !key.def_multi) {
 			err = -EINVAL;
